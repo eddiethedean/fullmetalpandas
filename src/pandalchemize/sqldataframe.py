@@ -9,10 +9,20 @@ Record = dict[str, Any]
 
 
 class SqlDataFrame(pd.DataFrame):
-    def __init__(self, name: str, engine: Engine):
+    _metadata = ['sqltable', 'primary_keys', 'name', 'engine']
+
+    def __init__(self, name: str, engine: Engine, *args, **kwargs):
         self.sqltable = tabulize.SqlTable(name, engine)
         data = row_dicts_to_data(self.sqltable.old_records)
-        super().__init__(data)
+        super().__init__(data, *args, **kwargs)
+
+    @property
+    def _constructor(self):
+        return SqlDataFrame
+
+    @property
+    def _constructor_sliced(self):
+        return SqlDataFrame
 
     @property
     def primary_keys(self) -> list[str]:
