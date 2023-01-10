@@ -16,13 +16,13 @@ class SqlDataFrame(pd.DataFrame):
         data = row_dicts_to_data(self.sqltable.old_records)
         super().__init__(data, *args, **kwargs)
 
-    @property
-    def _constructor(self):
-        return SqlDataFrame
+    #@property
+    #def _constructor(self):
+        #return SqlDataFrame
 
-    @property
-    def _constructor_sliced(self):
-        return SqlDataFrame
+    #@property
+    #def _constructor_sliced(self):
+        #return SqlDataFrame
 
     @property
     def primary_keys(self) -> list[str]:
@@ -36,7 +36,7 @@ class SqlDataFrame(pd.DataFrame):
         return self.sqltable.record_changes(self)
 
     def insert_record(self, record: Record) -> None:
-        self.append(record, ignore_index=True)
+        self.loc[len(self.index)] = record
 
     def insert_records(self, records: Sequence[Record]) -> None:
         for record in records:
