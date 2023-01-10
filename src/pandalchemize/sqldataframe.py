@@ -3,7 +3,6 @@ from typing import Any, Sequence
 import pandas as pd
 import tabulize
 from tinytim.rows import row_dicts_to_data
-from tinytim.insert import insert_rows
 from sqlalchemy.engine import Engine
 
 Record = dict[str, Any]
@@ -27,10 +26,11 @@ class SqlDataFrame(pd.DataFrame):
         return self.sqltable.record_changes(self)
 
     def insert_record(self, record: Record) -> None:
-        self.insert_records([record])
+        self.append(record, ignore_index=True)
 
     def insert_records(self, records: Sequence[Record]) -> None:
-        self.data = insert_rows(self.data, records)
+        for record in records:
+            self.insert_record(record)
 
     def pull(self):
         self.sqltable.pull()
