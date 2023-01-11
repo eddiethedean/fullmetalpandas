@@ -1,4 +1,4 @@
-from typing import Any, Sequence
+from typing import Any, Generator, Sequence
 
 import pandas as pd
 import tabulize
@@ -48,6 +48,10 @@ class SqlDataFrame(pd.DataFrame):
     def push(self) -> None:
         self.sqltable.push(self)
         self.pull()
+
+    def iterrows(self) -> Generator[tuple, None, None]:
+        for i, row in pd.DataFrame.iterrows(self):
+            yield i, row.to_dict()
 
 
     
