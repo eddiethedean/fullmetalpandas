@@ -16,6 +16,9 @@ class SqlDataFrame(pd.DataFrame):
         data = row_dicts_to_data(self.sqltable.old_records)
         super().__init__(data, *args, **kwargs)
 
+    def _sqldataframe_contructor(self, sqltable):
+        ...
+
     #@property
     #def _constructor(self):
         #return SqlDataFrame
@@ -49,9 +52,9 @@ class SqlDataFrame(pd.DataFrame):
         self.sqltable.push(self)
         self.pull()
 
-    def iterrows(self) -> Generator[tuple, None, None]:
-        for i, row in pd.DataFrame.iterrows(self):
-            yield i, row.to_dict()
+    def iterrows(self) -> Generator[tuple[int, dict], None, None]:
+        for i, (_, series) in enumerate(pd.DataFrame.iterrows(self)):
+            yield i, series.to_dict()
 
 
     
