@@ -1,4 +1,6 @@
-from typing import Any, Generator, Sequence
+from __future__ import annotations
+from typing import Any, Generator, Mapping, Optional, Sequence
+from functools import partial
 
 import pandas as pd
 import tabulize
@@ -8,24 +10,62 @@ from sqlalchemy.engine import Engine
 Record = dict[str, Any]
 
 
+def _sql_constructor(
+    self,
+    table_name: str,
+    engine: Engine
+) -> SqlDataFrame:
+    ...
+
+
 class SqlDataFrame(pd.DataFrame):
-    _metadata = ['sqltable', 'primary_keys', 'name', 'engine']
 
-    def __init__(self, name: str, engine: Engine, *args, **kwargs):
-        self.sqltable = tabulize.SqlTable(name, engine)
-        data = row_dicts_to_data(self.sqltable.old_records)
+    _metadata = ['sqltable', 'primary_keys']
+
+    def __init__(
+        self,
+        data=None,
+        table_name: Optional[str] = None,
+        engine: Optional[Engine] = None,
+        sqltable: Optional[tabulize.SqlTable] = None,
+        *args, 
+        **kwargs
+    ) -> None:
         super().__init__(data, *args, **kwargs)
+        if sqltable is not None:
+            self.sqltable = sqltable
+            self.table_name = sqltable.table_name
+        elif engine is not None and table_name is not None:
+            self.sqltable = tabulize.SqlTable(table_name, engine)
+            self.table_name = self.sqltable.table_name
+            data = self.sqltable.old_records
+            super().__init__(data, *args, **kwargs)
 
-    def _sqldataframe_contructor(self, sqltable):
-        ...
+    def _sql_constructor(
+        self,
+        table_name: str,
+        engine: Engine
+    ) -> SqlDataFrame:
+        return SqlDataFrame(
+            data=None, table_name=table_name, engine=engine
+        ) # type: ignore 
 
-    #@property
-    #def _constructor(self):
-        #return SqlDataFrame
+    def _data_constructor(
+        self,
+        data,
+        *args, 
+        **kwargs
+    ) -> SqlDataFrame:
+        return SqlDataFrame(
+            data, *args, table_name=self.sqltable.table_name, engine=None,
+            sqltable=self.sqltable,  
+            **kwargs
+        ) # type: ignore 
 
-    #@property
-    #def _constructor_sliced(self):
-        #return SqlDataFrame
+    @property
+    def _constructor(self, *args, **kwargs):
+        # used by pandas when it returns a new DataFrame
+        return self._data_constructor
 
     @property
     def primary_keys(self) -> list[str]:
@@ -56,5 +96,8 @@ class SqlDataFrame(pd.DataFrame):
         for i, (_, series) in enumerate(pd.DataFrame.iterrows(self)):
             yield i, series.to_dict()
 
+
+def read_sql(table_name: str, engine: Engine) -> SqlDataFrame:
+    return SqlDataFrame(table_name=table_name, engine=engine)
 
     
