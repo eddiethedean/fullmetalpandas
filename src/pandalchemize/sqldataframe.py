@@ -1,21 +1,11 @@
 from __future__ import annotations
 from typing import Any, Generator, Mapping, Optional, Sequence
-from functools import partial
 
 import pandas as pd
 import tabulize
-from tinytim.rows import row_dicts_to_data
 from sqlalchemy.engine import Engine
 
 Record = dict[str, Any]
-
-
-def _sql_constructor(
-    self,
-    table_name: str,
-    engine: Engine
-) -> SqlDataFrame:
-    ...
 
 
 class SqlDataFrame(pd.DataFrame):
@@ -96,6 +86,9 @@ class SqlDataFrame(pd.DataFrame):
         for i, (_, series) in enumerate(pd.DataFrame.iterrows(self)):
             yield i, series.to_dict()
 
+
+class SqlSeries(pd.Series):
+    ...
 
 def read_sql(table_name: str, engine: Engine) -> SqlDataFrame:
     return SqlDataFrame(table_name=table_name, engine=engine)
