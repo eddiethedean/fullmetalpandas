@@ -1,2 +1,2 @@
 pandas
-tabulize>=0.0.4
+tabulize>=0.1.0

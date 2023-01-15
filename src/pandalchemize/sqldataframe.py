@@ -1,9 +1,11 @@
 from __future__ import annotations
-from typing import Any, Generator, Mapping, Optional, Sequence
+from typing import Any, Generator, Optional, Sequence
 
 import pandas as pd
-import tabulize
 from sqlalchemy.engine import Engine
+import tabulize
+
+from pandalchemize.records import insert_record, insert_records, records
 
 Record = dict[str, Any]
 
@@ -24,10 +26,10 @@ class SqlDataFrame(pd.DataFrame):
         super().__init__(data, *args, **kwargs)
         if sqltable is not None:
             self.sqltable = sqltable
-            self.table_name = sqltable.table_name
+            self.table_name = sqltable.name
         elif engine is not None and table_name is not None:
             self.sqltable = tabulize.SqlTable(table_name, engine)
-            self.table_name = self.sqltable.table_name
+            self.table_name = self.sqltable.name
             data = self.sqltable.old_records
             super().__init__(data, *args, **kwargs)
 
@@ -47,7 +49,7 @@ class SqlDataFrame(pd.DataFrame):
         **kwargs
     ) -> SqlDataFrame:
         return SqlDataFrame(
-            data, *args, table_name=self.sqltable.table_name, engine=None,
+            data, *args, table_name=self.sqltable.name, engine=None,
             sqltable=self.sqltable,  
             **kwargs
         ) # type: ignore 
@@ -66,29 +68,28 @@ class SqlDataFrame(pd.DataFrame):
         self.sqltable.primary_keys = list(column_names)
 
     def record_changes(self) -> dict[str, list[Record]]:
-        return self.sqltable.record_changes(self)
+        return self.sqltable.record_changes(self.records())
 
     def insert_record(self, record: Record) -> None:
-        self.loc[len(self.index)] = record
+        insert_record(self, record)
 
     def insert_records(self, records: Sequence[Record]) -> None:
-        for record in records:
-            self.insert_record(record)
+        insert_records(self, records)
 
     def pull(self):
         self.sqltable.pull()
 
     def push(self) -> None:
-        self.sqltable.push(self)
+        self.sqltable.push(self.records())
         self.pull()
 
     def iterrows(self) -> Generator[tuple[int, dict], None, None]:
         for i, (_, series) in enumerate(pd.DataFrame.iterrows(self)):
             yield i, series.to_dict()
 
+    def records(self) -> list[Record]:
+        return records(self)
 
-class SqlSeries(pd.Series):
-    ...
 
 def read_sql(table_name: str, engine: Engine) -> SqlDataFrame:
     return SqlDataFrame(table_name=table_name, engine=engine)
