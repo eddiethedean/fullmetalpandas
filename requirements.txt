@@ -1,2 +1,5 @@
 pandas
 tabulize>=0.1.0
+fullmetaltable
+fullmetalalchemy
+transmutation

@@ -1,8 +1,8 @@
 creds.py
 notebooks/
 
-pandalchemize.egg-info/
-pandalchemize/__pycache__/
+fullmetalpandas.egg-info/
+fullmetalpandas/__pycache__/
 dist/
 build/
 .vscode/

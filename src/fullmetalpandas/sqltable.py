@@ -1,8 +1,8 @@
-from typing import Any, Dict
+from typing import Any, Dict, Tuple
 import tabulize as tz
 import pandas as pd
 
-from pandalchemize.records import df_to_records
+from fullmetalpandas.records import df_to_records
 
 Record = Dict[str, Any]
 
@@ -33,7 +33,7 @@ def read_sqltable(name: str, engine) -> SqlTable:
     return SqlTable(name, engine)
 
 
-def read_sqltable_dataframe(name: str,engine) -> tuple[SqlTable, pd.DataFrame]:
+def read_sqltable_dataframe(name: str,engine) -> Tuple[SqlTable, pd.DataFrame]:
     sqltable = SqlTable(name, engine)
     df = sqltable.pull()
     return sqltable, df

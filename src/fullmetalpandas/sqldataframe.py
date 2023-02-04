@@ -1,13 +1,13 @@
 from __future__ import annotations
-from typing import Any, Generator, Optional, Sequence
+from typing import Any, Generator, Optional, Sequence, Dict
 
 import pandas as pd
 from sqlalchemy.engine import Engine
 import tabulize
 
-from pandalchemize.records import insert_record, insert_records, records
+from fullmetalpandas.records import insert_record, insert_records, records
 
-Record = dict[str, Any]
+Record = Dict[str, Any]
 
 
 class SqlDataFrame(pd.DataFrame):
@@ -23,7 +23,7 @@ class SqlDataFrame(pd.DataFrame):
         *args, 
         **kwargs
     ) -> None:
-        super().__init__(data, *args, **kwargs)
+        super().__init__(data, *args, **kwargs) # type: ignore
         if sqltable is not None:
             self.sqltable = sqltable
             self.table_name = sqltable.name
@@ -31,7 +31,7 @@ class SqlDataFrame(pd.DataFrame):
             self.sqltable = tabulize.SqlTable(table_name, engine)
             self.table_name = self.sqltable.name
             data = self.sqltable.old_records
-            super().__init__(data, *args, **kwargs)
+            super().__init__(data, *args, **kwargs) # type: ignore
 
     def _sql_constructor(
         self,
@@ -92,6 +92,6 @@ class SqlDataFrame(pd.DataFrame):
 
 
 def read_sql(table_name: str, engine: Engine) -> SqlDataFrame:
-    return SqlDataFrame(table_name=table_name, engine=engine)
+    return SqlDataFrame(table_name=table_name, engine=engine) # type: ignore
 
     

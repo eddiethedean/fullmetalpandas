@@ -1,4 +1,4 @@
-from typing import Any, Dict, Generator, Iterable
+from typing import Any, Dict, Generator, Iterable, List
 import pandas as pd
 
 Record = Dict[str, Any]
@@ -8,7 +8,7 @@ def insert_record(
     df: pd.DataFrame,
     record: Record
 ) -> None:
-    df.loc[len(df.index)] = record
+    df.loc[len(df.index)] = record # type: ignore
 
 
 def insert_records(
@@ -24,10 +24,10 @@ def iterrecords(df) -> Generator[dict, None, None]:
         yield series.to_dict()
 
 
-def records(df) -> list[Record]:
+def records(df) -> List[Record]:
     return list(iterrecords(df))
 
 
-def df_to_records(df: pd.DataFrame) -> list[Record]:
-    return df.to_dict('records')
+def df_to_records(df: pd.DataFrame) -> List[Record]:
+    return df.to_dict('records') # type: ignore
     
