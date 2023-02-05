@@ -3,7 +3,7 @@ from typing import Any, Generator, Optional, Sequence, Dict
 
 import pandas as pd
 from sqlalchemy.engine import Engine
-import tabulize
+import elric
 
 from fullmetalpandas.records import insert_record, insert_records, records
 
@@ -19,7 +19,7 @@ class SqlDataFrame(pd.DataFrame):
         data=None,
         table_name: Optional[str] = None,
         engine: Optional[Engine] = None,
-        sqltable: Optional[tabulize.SqlTable] = None,
+        sqltable: Optional[elric.SqlTable] = None,
         *args, 
         **kwargs
     ) -> None:
@@ -28,7 +28,7 @@ class SqlDataFrame(pd.DataFrame):
             self.sqltable = sqltable
             self.table_name = sqltable.name
         elif engine is not None and table_name is not None:
-            self.sqltable = tabulize.SqlTable(table_name, engine)
+            self.sqltable = elric.SqlTable(table_name, engine)
             self.table_name = self.sqltable.name
             data = self.sqltable.old_records
             super().__init__(data, *args, **kwargs) # type: ignore
